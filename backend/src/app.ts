@@ -1,4 +1,5 @@
 import express from 'express';
+import { analyzeImage } from './modules/catalog/agent-chat.js';
 import { z } from 'zod';
 import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import { config } from './config.js';
@@ -64,6 +65,10 @@ export function createApp(store: Store, crm: DeskcommService, catalog: CatalogSe
     ])}).parse(req.body);
     store.finishBrowserJob(id,token,result);
     res.json({ok:true});
+  });
+  app.post('/api/agent/chat', express.json({ limit: '2mb' }), async (req, res) => {
+    const { image, note } = z.object({image: z.string().min(1).max(1800000), note: z.string().max(800).default('')}).parse(req.body);
+    res.json(await analyzeImage(store.readLlmSettings(), image, note, catalog.shapes()));
   });
   app.use(express.json({ limit: '64kb' }));
   const demo = (req: express.Request) => req.query.demo === 'true';

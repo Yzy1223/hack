@@ -3,7 +3,7 @@ import { lookupFitments } from './catalog/fitments.js';
 
 export interface ModelConfig { baseUrl: string; model: string; apiKey: string }
 
-async function complete(cfg: ModelConfig, instruction: string, data: unknown) {
+export async function complete(cfg: ModelConfig, instruction: string, data: unknown, photo?: string) {
   const base = cfg.baseUrl.replace(/\/+$/, '');
   const endpoint = base.endsWith('/chat/completions') ? base : base + '/chat/completions';
   const res = await fetch(endpoint, {
@@ -11,7 +11,7 @@ async function complete(cfg: ModelConfig, instruction: string, data: unknown) {
     headers: {Authorization: 'Bearer ' + cfg.apiKey, 'Content-Type': 'application/json'},
     body: JSON.stringify({model: cfg.model, messages: [
       {role: 'system', content: instruction},
-      {role: 'user', content: JSON.stringify(data)},
+      {role: 'user', content: photo ? [{type:'text', text:JSON.stringify(data)}, {type:'image_url',image_url:{url:photo}}] : JSON.stringify(data)},
     ]}),
   });
   if (!res.ok) throw new Error('模型服务返回 HTTP ' + res.status);

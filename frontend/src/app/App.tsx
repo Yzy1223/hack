@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { WorkspaceProvider, useWorkspace } from './WorkspaceContext';
+import { AgentChat } from '../pages/agent/AgentChat';
 import { Shell } from './Shell';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { InquiriesPage } from '../pages/inquiries/InquiriesPage';
@@ -26,6 +27,7 @@ function Workbench() {
           <InquiriesPage initialSelected={selected} onConnect={() => setConnect(true)} />
         )}
         {view === 'facebook' && <FacebookPage />}
+        {view === 'agent' && <AgentChat />}
       </div>
       {connect && <ConnectionDialog onClose={() => setConnect(false)} />}
       <div className={'toast ' + (toast ? 'visible' : '')} role="status" aria-live="polite">

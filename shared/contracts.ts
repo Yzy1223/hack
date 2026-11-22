@@ -1,6 +1,6 @@
 export type Channel = 'whatsapp' | 'facebook';
 export type Priority = 'urgent' | 'followup' | 'low';
-export type View = 'dashboard' | 'inquiries' | 'facebook';
+export type View = 'dashboard' | 'inquiries' | 'facebook' | 'agent';
 export interface Inquiry {
   id: string;
   name: string;

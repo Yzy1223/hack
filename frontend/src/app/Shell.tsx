@@ -1,6 +1,7 @@
 import {
   BarChart3,
   CheckCheck,
+  MessageSquare,
   ChevronDown,
   CircleGauge,
   Settings,
@@ -14,6 +15,7 @@ import { BrandIcon } from '../components/BrandIcon';
 import { StatusDot } from '../components/Primitives';
 import { useWorkspace } from './WorkspaceContext';
 const titles: Record<View, string> = {
+  agent: 'Agent Chat',
   dashboard: '今日数据',
   inquiries: 'AI 询盘',
   facebook: 'Facebook 监控',
@@ -70,6 +72,9 @@ export function Shell({
           >
             <BrandIcon channel="facebook" size={21} />
             <span>Facebook 监控</span>
+          </button>
+          <button aria-label="Agent Chat" className={view === 'agent' ? 'active' : ''} onClick={() => navigate('agent')}>
+            <MessageSquare size={20} /><span>Agent Chat</span>
           </button>
         </nav>
         <div className="sidebar-bottom">

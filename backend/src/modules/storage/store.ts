@@ -109,7 +109,7 @@ export class Store {
   saveApifyToken(token: string) {
     this.db.prepare("INSERT INTO settings(name,value) VALUES('apify_token',?) ON CONFLICT(name) DO UPDATE SET value=excluded.value").run(token);
   }
-  private readLlmSettings(): { baseUrl: string; model: string; apiKey: string } {
+  readLlmSettings(): { baseUrl: string; model: string; apiKey: string } {
     const row = this.db.prepare("SELECT value FROM settings WHERE name='llm_config'").get();
     return row ? JSON.parse(String(row.value)) : { baseUrl: '', model: '', apiKey: '' };
   }

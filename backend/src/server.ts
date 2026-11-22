@@ -29,7 +29,7 @@ const server = app.listen(config.port, host, (error?: Error) => {
   }
   console.log('Workbench API listening on ' + host + ':' + config.port + ' | catalog: ' + catalog.count());
   replyTimer = setInterval(() => {
-    if (!replies) replies = store.modelReplies.tick(crm).catch(() => console.error('WhatsApp inbox unavailable'))
+    if (!replies) replies = store.modelReplies.tick(crm, catalog.shapes()).catch(() => console.error('WhatsApp inbox unavailable'))
       .finally(() => { replies = undefined; });
   }, 15000);
   monitorTimer = setInterval(() => {

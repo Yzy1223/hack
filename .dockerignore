@@ -20,3 +20,6 @@
 !catalog/
 !catalog/**/features.json
 !catalog/**
+
+!backend/resources/checked/
+!backend/resources/checked/*.webp

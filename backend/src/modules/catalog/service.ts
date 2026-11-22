@@ -31,6 +31,7 @@ export class CatalogService {
     await walk(this.root);
     this.items = found.sort((a, b) => a.model.localeCompare(b.model, 'zh-CN'));
   }
+  shapes() { return this.items; }
   count() {
     return this.items.length;
   }

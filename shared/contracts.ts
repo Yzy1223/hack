@@ -17,7 +17,12 @@ export interface Inquiry {
   model?: string;
   tags: string[];
 }
+export interface PhotoMatch {
+  observation: string;
+  candidates: { model: string; evidence: string }[];
+}
 export interface Message {
+  photoMatch?: PhotoMatch;
   id: string;
   direction: 'inbound' | 'outbound';
   text: string;
@@ -96,4 +101,13 @@ export interface ApifyProbe {
   comments: MonitorComment[];
   titleError?: string;
   commentError?: string;
+}
+
+export interface CatalogRow {
+  id:string; model:string; dimensions:string; holes:number | null; page:number;
+  fitment:string; references:string; warnings:string; sourceChecked?:boolean;
+}
+export interface Evidence {
+  rows:CatalogRow[]; count:number; basis:string[]; material:string; quantity:string;
+  conflict:boolean; nextQuestion:string;
 }

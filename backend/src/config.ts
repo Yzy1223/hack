@@ -10,8 +10,7 @@ export const config = {
   accessPassword: process.env.WORKBENCH_PASSWORD || '',
   port: Number(process.env.PORT || 4310),
   dataPath: path.join(backendRoot, 'data', 'workbench.sqlite'),
-  catalogPath: path.resolve(backendRoot, process.env.CATALOG_PATH ||
-    (existsSync(path.resolve(backendRoot, '../../gushi')) ? '../../gushi' : '../catalog')),
+  catalogPath: path.resolve(backendRoot, process.env.CATALOG_PATH || (existsSync(path.resolve(backendRoot, '../../gushi')) ? '../../gushi' : '../catalog')),
   deskcommUrl: process.env.DESKCOMM_URL?.replace(/\/$/, '') || '',
   apiToken: process.env.DESKCOMM_API_TOKEN || '',
   sessionCookie: process.env.DESKCOMM_SESSION_COOKIE || '',

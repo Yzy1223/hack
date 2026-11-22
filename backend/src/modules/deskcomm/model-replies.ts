@@ -1,18 +1,24 @@
 import { randomUUID } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
-import type { Inquiry } from '../../../../shared/contracts.js';
+import type { CatalogItem, Inquiry, Message, PhotoMatch } from '../../../../shared/contracts.js';
 import type { DeskcommService } from './service.js';
-import { generateReply, type ModelConfig } from '../model.js';
+import { generateReply, matchPhoto, type ModelConfig } from '../model.js';
 import { AppError } from '../../lib/errors.js';
 
-type Crm = Pick<DeskcommService, 'inquiries' | 'messages' | 'setAi' | 'send'>;
+type Crm = Pick<DeskcommService, 'inquiries' | 'messages' | 'setAi' | 'send'> & Partial<Pick<DeskcommService,'photo'>>;
 interface Session { id: string; started: number; epoch: string; handled: string; error: string | null }
 
 export class ModelReplies {
   private changing = new Set<string>();
   private busy = false;
   constructor(private db: DatabaseSync, private config: () => ModelConfig) {
+    db.exec('CREATE TABLE IF NOT EXISTS inquiry_photos(chat TEXT, message TEXT, result TEXT NOT NULL, PRIMARY KEY(chat,message))');
     db.exec('CREATE TABLE IF NOT EXISTS model_chats(id TEXT PRIMARY KEY, started INTEGER NOT NULL, epoch TEXT NOT NULL, handled TEXT NOT NULL, error TEXT)');
+  }
+  withPhotos(id: string, messages: Message[]): Message[] {
+    const rows = this.db.prepare('SELECT message,result FROM inquiry_photos WHERE chat=?').all(id);
+    const matches = new Map(rows.map(row => [String(row.message), JSON.parse(String(row.result)) as PhotoMatch]));
+    return messages.map(m => ({...m, photoMatch:m.revoked ? undefined : matches.get(m.id)}));
   }
   private sessions() {
     return this.db.prepare('SELECT * FROM model_chats').all() as unknown as Session[];
@@ -44,7 +50,7 @@ export class ModelReplies {
       return {ok: true};
     } finally { this.changing.delete(id); }
   }
-  async tick(crm: Crm) {
+  async tick(crm: Crm, shapes: CatalogItem[] = []) {
     if (this.busy) return;
     const sessions = this.sessions();
     if (!sessions.length) return;
@@ -59,10 +65,25 @@ export class ModelReplies {
           continue;
         }
         try {
-          const messages = await crm.messages(session.id);
+          const messages = this.withPhotos(session.id, await crm.messages(session.id));
           const last = messages.at(-1);
-          if (!last || last.revoked || last.direction !== 'inbound' || !last.text.trim() || last.id === session.handled
+          if (!last || last.revoked || last.direction !== 'inbound' || (!last.text.trim() && last.mediaType !== 'image') || last.id === session.handled
               || !(Date.parse(last.time) >= Math.floor(session.started / 1000) * 1000)) continue;
+          const baseline = messages.findLastIndex(m => m.id === session.handled || m.direction === 'outbound');
+          for (const message of messages.slice(baseline + 1)) {
+            if (message.revoked || message.mediaType !== 'image' || message.photoMatch ||
+                Date.parse(message.time) < Math.floor(session.started / 1000) * 1000) continue;
+            try {
+              if (!crm.photo) throw new Error('此连接无法读取原图');
+              message.photoMatch = await matchPhoto(this.config(), await crm.photo(message.id), shapes);
+              this.db.prepare('INSERT OR REPLACE INTO inquiry_photos VALUES(?,?,?)')
+                .run(session.id, message.id, JSON.stringify(message.photoMatch));
+            } catch {
+              message.photoMatch = {observation:'原图未能读取或分析，请补充旧件编号或清晰照片，销售可人工复核。', candidates:[]};
+              this.db.prepare('INSERT OR REPLACE INTO inquiry_photos VALUES(?,?,?)')
+                .run(session.id, message.id, JSON.stringify(message.photoMatch));
+            }
+          }
           const reply = await generateReply(this.config(), messages.filter(message => !message.revoked));
           const fresh = (await crm.messages(session.id)).at(-1);
           if (fresh?.id !== last.id || fresh.revoked || fresh.text !== last.text || this.changing.has(session.id)) continue;

@@ -538,3 +538,19 @@
   margin-top: 22px;
   white-space: pre-wrap;
 }
+.customer-photo,.source-row img { display:block; max-width:100%; max-height:245px; object-fit:contain; margin:6px 0; }
+.source-row,.quote-basis>details,.photo-match { padding:6px 0; font-size:12px; overflow-wrap:anywhere; }
+.quote-basis details summary,.photo-match summary { cursor:pointer; }
+.quote-basis h3 { font-size:14px; margin-bottom:8px; }
+.quote-basis p { margin:6px 0; font-size:12px; }
+.quote-basis .basis-line { border-left:2px solid #a6b9af; padding-left:8px; }
+@media (min-width:701px) {
+  .inquiry-details { display:block; order:1; border-left:none; border-right:1px solid var(--border); }
+  .chat { order:2; min-width:0; }
+}
+@media (min-width:701px) and (max-width:1150px) {
+  .inbox-layout { flex-wrap:wrap; height:auto; max-height:none; }
+  .conversation-list { width:30%; }
+  .chat { width:70%; flex:1; min-height:520px; }
+  .inquiry-details { order:3; width:100%; border-top:1px solid var(--border); }
+}

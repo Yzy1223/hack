@@ -1,11 +1,62 @@
 import { readFileSync } from 'node:fs';
 
-interface Fitment {
+export interface Fitment {
+  sourceChecked?: boolean;
   id: string; model: string; series: string; dimensions: string; holes: number | null;
   fitment: string; references: string; warnings: string; duplicate: string; page: number;
 }
 const normalize = (s: string) => s.normalize('NFKC').toUpperCase().replace(/[\s‐‑–—-]+/g, '');
 const records = JSON.parse(readFileSync(new URL('../../../resources/fitments.json', import.meta.url), 'utf8')) as Fitment[];
+// Source crops are valid only while the compared catalogue fields still agree.
+const checked: Record<string, unknown[]> = {
+  "GL-P11-C4-R04": [
+    "CA485前A",
+    "208×160×16/20",
+    8,
+    "CA485前A",
+    11
+  ],
+  "GL-P11-C4-R05": [
+    "CA485前B",
+    "202×160×9/20",
+    8,
+    "CA485前B",
+    11
+  ],
+  "GL-P11-C4-R06": [
+    "CA485后",
+    "190×220×12/16",
+    12,
+    "解放485桥",
+    11
+  ],
+  "GL-P12-C2-R11": [
+    "解放J6前",
+    "210×150×14.5",
+    10,
+    "解放J6前",
+    12
+  ],
+  "GL-P12-C2-R12": [
+    "解放J6后A",
+    "169×200×14/19",
+    10,
+    "解放J6后A",
+    12
+  ],
+  "GL-P12-C3-R01": [
+    "解放J6后B",
+    "206×200×11.5/19",
+    16,
+    "解放J6后B",
+    12
+  ]
+};
+for (const row of records) {
+  const values = [row.model, row.dimensions, row.holes, row.fitment, row.page];
+  row.sourceChecked = checked[row.id]?.every((v,i) => v === values[i]) === true;
+}
+export const checkedFitments = records.filter(row => row.sourceChecked);
 const searchable = records.filter(row => !row.duplicate).map(row => {
   const name = normalize(row.model);
   const aliases = [row.model, ...row.fitment.split(/[、,，；;]/).map(v => v.replace(/^通用/, ''))];

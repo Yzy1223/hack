@@ -1,3 +1,4 @@
+import { QuoteBasis } from './QuoteBasis';
 import { CatalogDialog } from './CatalogDialog';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import {
@@ -9,7 +10,7 @@ import {
   ChevronRight,
   Search,
 } from 'lucide-react';
-import type { Inquiry, Message, CatalogItem } from '../../../../shared/contracts';
+import type { Inquiry, Message, CatalogItem, Evidence } from '../../../../shared/contracts';
 import { useWorkspace } from '../../app/WorkspaceContext';
 import { api, initials, time } from '../../lib/api';
 import { BrandIcon } from '../../components/BrandIcon';
@@ -25,17 +26,20 @@ export function Conversation({ inquiry }: { inquiry: Inquiry }) {
     [catalogQuery, setCatalogQuery] = useState(inquiry.model || ''),
     [catalog, setCatalog] = useState<CatalogItem[]>([]);
   const [catalogItem, setCatalogItem] = useState<CatalogItem | null>(null);
+  const [evidence, setEvidence] = useState<Evidence | null>(null);
   const last = useRef<HTMLDivElement>(null),
     sendKey = useRef({ text: '', key: crypto.randomUUID() }),
     sending = useRef(false);
   async function load(signal?: AbortSignal) {
     try {
-      const result = await api<Message[]>(
-        '/inquiries/' + inquiry.id + '/messages',
+      const result = await api<{messages:Message[];evidence:Evidence}>(
+        '/inquiries/' + inquiry.id + '/messages?evidence=1',
         { signal },
         demo,
       );
-      setMessages(result);
+      if (signal?.aborted) return;
+      setMessages(result.messages);
+      setEvidence(result.evidence);
       setError('');
     } catch (e) {
       if (!signal?.aborted) setError(e instanceof Error ? e.message : '消息加载失败');
@@ -149,6 +153,13 @@ export function Conversation({ inquiry }: { inquiry: Inquiry }) {
           {messages.map((message) => (
             <div className={'message ' + message.direction} key={message.id}>
               <div className="message-bubble">
+                {!demo && !message.revoked && message.mediaType === 'image' && <img className="customer-photo" loading="lazy"
+                  src={'/api/media/'+encodeURIComponent(message.id)} alt="客户消息原图（无法加载时请补图）"/>}
+                {message.photoMatch && <details className="photo-match"><summary>查看照片匹配依据</summary>
+                  <p>{message.photoMatch.observation}</p>
+                  {message.photoMatch.candidates.map(c=><p key={c.model}>{c.model} · {c.evidence}</p>)}
+                  {!message.photoMatch.candidates.length && <p>暂无可支持的型号，请补图或核对旧件编号。</p>}
+                </details>}
                 {message.text || '[' + (message.mediaType || '附件') + ']'}
                 <span className="message-meta">
                   {time(message.time)}
@@ -210,6 +221,7 @@ export function Conversation({ inquiry }: { inquiry: Inquiry }) {
           <h3>询盘信息</h3>
           <Badge priority={inquiry.priority} />
         </div>
+        <QuoteBasis evidence={evidence} demo={demo}/>
         <div className="detail-section">
           <span className="detail-label">当前进展</span>
           <p>{inquiry.summary}</p>
@@ -245,8 +257,8 @@ export function Conversation({ inquiry }: { inquiry: Inquiry }) {
                 />
               </label>
               <div className="catalog-results">
-                {catalog.map((item) => (
-                  <button key={item.model} onClick={() => setCatalogItem(item)}>
+                {catalog.map((item,index) => (
+                  <button key={item.model + '-' + index} onClick={() => setCatalogItem(item)}>
                     <strong>{item.model}</strong>
                     <small>{item.reviewed ? '已校验' : '待人工校验'}</small>
                   </button>

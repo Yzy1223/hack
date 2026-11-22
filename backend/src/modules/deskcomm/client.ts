@@ -1,3 +1,4 @@
+import { readPhoto } from './media.js';
 import { AppError } from '../../lib/errors.js';
 
 export interface DeskcommConfig {
@@ -10,6 +11,7 @@ export class DeskcommClient {
     readonly config: DeskcommConfig,
     private transport: typeof fetch = fetch,
   ) {}
+  photo(id: string) { return readPhoto(this.config, id, this.transport); }
   get configured() {
     return Boolean(this.config.deskcommUrl && (this.config.apiToken || this.config.sessionCookie));
   }

@@ -91,6 +91,7 @@ export class DeskcommService {
       }))
       .sort((a, b) => a.time.localeCompare(b.time));
   }
+  photo(id: string) { return this.client.photo(id); }
   createChannel(key: string) {
     return this.client.request('/api/v1/channel-sessions', {
       method: 'POST',

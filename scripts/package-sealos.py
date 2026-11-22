@@ -21,6 +21,10 @@ with ZipFile(archive, "w", ZIP_DEFLATED) as bundle:
         for file in sorted((root / folder).rglob("*")):
             if file.is_file() and file.suffix in {".css", ".ts", ".tsx"}:
                 bundle.write(file, file.relative_to(root).as_posix())
+    for file in sorted((root / "backend/resources/checked").glob("*.webp")):
+        bundle.write(file, file.relative_to(root).as_posix())
+    for file in sorted((root / "backend/test").glob("*.test.ts")):
+        bundle.write(file, file.relative_to(root).as_posix())
     bundle.writestr("catalog/", "")
     count = 0
     for file in sorted(catalog.rglob("features.json")):
@@ -35,3 +39,4 @@ with ZipFile(archive, "w", ZIP_DEFLATED) as bundle:
         bundle.writestr("catalog/" + relative.as_posix(), json.dumps(summary, ensure_ascii=False))
         count += 1
 print(f"{archive}: {count} catalog entries")
+

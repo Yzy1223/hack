@@ -1,4 +1,6 @@
 import express from 'express';
+import { fileURLToPath } from 'node:url';
+import { inquiryEvidence, firstBatch } from './modules/catalog/evidence.js';
 import { z } from 'zod';
 import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import { config } from './config.js';
@@ -140,9 +142,21 @@ export function createApp(store: Store, crm: DeskcommService, catalog: CatalogSe
     res.json({ configured: true });
   });
   app.get('/api/catalog', (req, res) => res.json(catalog.search(String(req.query.q || ''))));
-  app.get('/api/inquiries/:id/messages', async (req, res) =>
-    res.json(demo(req) ? store.messages(id(req)) : await crm.messages(id(req))),
-  );
+  app.use('/api/catalog/source', express.static(fileURLToPath(new URL('../resources/checked/', import.meta.url))));
+  app.get('/api/catalog/first-batch', (_req,res) => res.json(firstBatch()));
+  app.get('/api/media/:id', async (req,res) => {
+    if (demo(req)) throw new AppError(404,'demo_media','演示会话没有原图');
+    const photo = await crm.photo(id(req));
+    res.setHeader('X-Content-Type-Options','nosniff');
+    res.type(photo.mime).send(photo.bytes);
+  });
+  app.get('/api/inquiries/:id/messages', async (req, res) => {
+    const messages = demo(req) ? store.messages(id(req)) : store.modelReplies.withPhotos(id(req), await crm.messages(id(req)));
+    if (req.query.evidence === '1') {
+      const {rows, ...details} = inquiryEvidence(messages);
+      res.json({messages, evidence:{...details, count:rows.length, rows:rows.slice(0,30)}});
+    } else res.json(messages);
+  });
   app.post('/api/inquiries/:id/ai', async (req, res) => {
     const { enabled } = z.object({ enabled: z.boolean() }).parse(req.body);
     res.json(demo(req) ? store.setOwner(id(req), enabled) : await store.modelReplies.toggle(crm, id(req), enabled));

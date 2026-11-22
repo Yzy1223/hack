@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "询盘工作台 · Facebook 评论采集",
+  "description": "在当前 Chrome 登录状态下，读取本机工作台已添加帖子的可见评论。",
+  "version": "1.0.0",
+  "minimum_chrome_version": "120",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkHDWeEhrPnnrRZlqWB3QxXrX/hJKa2/HvGi0I+jf/gosfJ327lvF1zlcNTjr//QWkFlATbFYkaChHs1/bF1osHbfwaQc9c6+ItvjS3kn2SfykILLXSFnhj0gc6m5IuK5TRSmoDjxw9a6EEC6ZnyF14mX9tFXVl8+KMT8dhnpF2aI4BFjUuh+BMrrfHkhFVbdLJxUr3fRVIPaUILk757pwWBjL5UAbgvmQDJnRknmy7KplK+6EDNLMK8+27LhGWwhES7Nn5oQngTslP9x0NKOg6Wcl94NlZjj3xcfpZbyD3nojaEe+lxiMGbdbPqinSSVAxrrRHaGXJ2q06OYqZVDVwIDAQAB",
+  "permissions": ["alarms", "scripting", "storage"],
+  "host_permissions": ["https://www.facebook.com/*", "https://facebook.com/*", "https://m.facebook.com/*", "https://fb.watch/*", "http://127.0.0.1/*"],
+  "action": {"default_title": "立即检查工作台的到期帖子"},
+  "background": {"service_worker": "worker.js"}
+}

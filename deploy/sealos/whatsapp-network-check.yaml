@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: whatsapp-network-check
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 120
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      containers:
+        - name: https-check
+          image: node:24-bookworm-slim
+          command: ["node", "--input-type=module", "-e"]
+          args:
+            - |
+              // HTTPS egress only. Session pairing and inbound media require a live WAHA test.
+              const res = await fetch('https://web.whatsapp.com/', {
+                signal: AbortSignal.timeout(15000),
+                redirect: 'error'
+              });
+              console.log('web.whatsapp.com HTTPS status:', res.status);
+              await res.body?.cancel();
+              if (!res.ok) process.exitCode = 1;
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { cpu: 250m, memory: 128Mi }
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }

@@ -1,0 +1,64 @@
+.buyer-leads {
+  margin-bottom: 20px;
+}
+.buyer-leads-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.buyer-leads-header small,
+.buyer-goods small {
+  color: #686868;
+}
+.buyer-leads-header button[aria-pressed='true'] {
+  color: white;
+  background: var(--text);
+}
+.buyer-leads-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+  gap: 18px;
+  padding: 18px 20px;
+}
+.buyer-leads-list article {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+.buyer-leads-list small {
+  color: #575757;
+}
+.buyer-leads-list h3,
+.buyer-evidence h3 {
+  font-size: 16px;
+}
+.buyer-leads-list p,
+.buyer-evidence p {
+  font-size: 14px;
+  line-height: 1.55;
+}
+.buyer-leads-list button {
+  justify-self: start;
+  margin-top: 5px;
+}
+.buyer-evidence {
+  display: grid;
+  gap: 10px;
+  overflow-wrap: anywhere;
+}
+.buyer-evidence a {
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.buyer-evidence section,
+.buyer-evidence .button {
+  margin-block: 8px;
+}
+.buyer-goods {
+  padding-block: 12px;
+  border-bottom: 1px solid var(--border);
+}

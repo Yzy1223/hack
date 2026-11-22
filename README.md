@@ -4,16 +4,16 @@
 
 ## 启动
 
-Node.js 24。项目目录：D:\\hacksong\\inquiry-workbench。
+使用 Node.js 24，在项目根目录执行：
 
 ```powershell
-cd D:\hacksong\inquiry-workbench
-npm.cmd ci --cache D:\hacksong\.task-tmp\npm-cache
+npm.cmd ci
 npm.cmd run dev
 ```
 
 - 前端：http://127.0.0.1:5173/
 - 演示：http://127.0.0.1:5173/?demo=1
+- 演示首页的「终端买家核验」按机构展示 10 行贸易明细和独立采购计划。点击「查看证据」核对货描、来源及跟进建议。「我的跟进」保存在当前浏览器；这一演示使用预整理证据，无需平台账号或模型密钥。
 - 后端：http://127.0.0.1:4310/api/health
 - 生产预览：先运行 npm.cmd run build，再运行 npm.cmd start，访问 http://127.0.0.1:4310/。
 - 也可以在 PowerShell 执行 .\\scripts\\start.ps1。

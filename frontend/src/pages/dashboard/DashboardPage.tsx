@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import {
   ArrowRight,
   Bell,
@@ -16,6 +16,7 @@ import { AddMonitorDialog } from '../facebook/AddMonitorDialog';
 import { time } from '../../lib/api';
 import type { Channel, Priority } from '../../../../shared/contracts';
 import './dashboard.css';
+const BuyerLeadsPanel = lazy(() => import('./BuyerLeadsPanel'));
 const ranks: Record<Priority, number> = { urgent: 0, followup: 1, low: 2 };
 export function DashboardPage({
   openInquiry,
@@ -24,7 +25,7 @@ export function DashboardPage({
   openInquiry: (id: string) => void;
   openFacebook: () => void;
 }) {
-  const { data, loading } = useWorkspace();
+  const { data, loading, demo } = useWorkspace();
   const [channel, setChannel] = useState<'all' | Channel>('all'),
     [priority, setPriority] = useState('all'),
     [filter, setFilter] = useState(false),
@@ -82,6 +83,11 @@ export function DashboardPage({
           </article>
         ))}
       </section>
+      {demo && (
+        <Suspense fallback={null}>
+          <BuyerLeadsPanel />
+        </Suspense>
+      )}
       <div className="dashboard-grid">
         <section className="panel queue-panel">
           <div className="panel-toolbar">

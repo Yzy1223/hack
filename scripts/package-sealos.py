@@ -11,7 +11,8 @@ archive = root / "workbench-sealos.zip"
 files = ["Dockerfile", ".dockerignore", "package.json", "package-lock.json",
          "backend/package.json", "backend/tsconfig.json", "frontend/package.json",
          "frontend/index.html", "frontend/vite.config.ts", "frontend/tsconfig.json",
-         "docs/sealos.md", "backend/resources/fitments.json"]
+         "docs/sealos.md", "backend/resources/fitments.json",
+         "frontend/src/pages/dashboard/buyer-evidence-demo.json"]
 if not catalog.is_dir():
     raise SystemExit(f"Missing catalog directory: {catalog}")
 with ZipFile(archive, "w", ZIP_DEFLATED) as bundle:
